@@ -85,7 +85,7 @@ class PropertyValidator extends Validator<Object> {
     }
 
     return ValidatorError(
-      // target: target,
+      target: target,
       property: property,
       value: value,
       messages: messages,
@@ -140,6 +140,6 @@ class ClassValidator<T> extends Validator<T> {
 }
 
 List<ValidatorError> validate<T>(T value) {
-  final error = getValidatorFor<T>().validate(value);
-  return error.children;
+  final error = getValidatorFor<T>()?.validate(value);
+  return error?.children;
 }
