@@ -25,7 +25,7 @@ abstract class Validator<T> {
     return ValidatorError(
       property: property,
       value: value,
-      messages: <String, String>{
+      messages: {
         name: message(value, property),
       },
     );
@@ -34,29 +34,33 @@ abstract class Validator<T> {
 
 @immutable
 class ValidatorError extends Error {
-  final Object target;
+  static bool includeTarget = false;
+
+  ValidatorError({
+    this.property,
+    this.value,
+    this.messages,
+    this.target,
+    this.children,
+  });
+
+  final dynamic target;
 
   final String property;
 
-  final Object value;
+  final dynamic value;
 
   final Map<String, String> messages;
 
   final List<ValidatorError> children;
 
-  ValidatorError(
-      {this.property, this.value, this.messages, this.target, this.children});
-
-  Map<String, Object> toJson() {
-    return <String, Object>{
-      if (target != null) 'target': target,
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      if (includeTarget && target != null) 'target': target,
       if (property != null) 'property': property,
       if (value != null) 'value': value,
       if (messages != null) 'messages': messages,
-      if (children != null)
-        'children': children
-            .map<Map<String, Object>>((ValidatorError child) => child.toJson())
-            .toList(growable: false),
+      if (children != null) 'children': children,
     };
   }
 }

@@ -31,5 +31,5 @@ void main() {
     ..rating = 11
     ..email = 'google.com'
     ..site = 'google.com';
-  print(const JsonEncoder.withIndent('  ').convert(validate(post)));
+  print(JsonEncoder.withIndent('  ').convert(validate(post)));
 }

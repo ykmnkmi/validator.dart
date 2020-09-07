@@ -7,11 +7,11 @@ import 'package:meta/meta.dart';
 import 'validator.dart';
 
 // type [property : [validator]]
-final container = <Type, Validator>{};
+final _container = <Type, Validator>{};
 
 Validator<T> getValidatorFor<T>() {
-  if (container.containsKey(T)) {
-    return container[T] as Validator<T>;
+  if (_container.containsKey(T)) {
+    return _container[T] as Validator<T>;
   }
 
   final clazz = reflectClass(T);
@@ -20,19 +20,20 @@ Validator<T> getValidatorFor<T>() {
 
   final validators = <PropertyValidator>[];
 
-  for (var symbol in clazz.declarations.keys) {
-    if (symbol == #hashCode || symbol == #runtimeType) {
+  for (final symbol in clazz.declarations.keys) {
+    if (symbol == #hashCode || symbol == #runtimeType || symbol == #toString) {
       continue;
     }
 
     final meta = declarations[symbol].metadata;
+    final member = members[symbol];
 
-    if (meta.isNotEmpty && !members[symbol].isStatic) {
+    if (meta.isNotEmpty && member.isGetter && !member.isStatic) {
       validators.add(PropertyValidator(
           symbol,
           meta
-              .map<Object>((InstanceMirror m) => m.reflectee)
-              .whereType<Validator<Object>>()
+              .map((m) => m.reflectee)
+              .whereType<Validator>()
               .toList(growable: false)));
     }
   }
@@ -41,15 +42,17 @@ Validator<T> getValidatorFor<T>() {
 }
 
 @immutable
-class PropertyValidator extends Validator<Object> {
+class PropertyValidator extends Validator {
   PropertyValidator(this.property, this.validators);
 
   final Symbol property;
 
-  final List<Validator<Object>> validators;
+  final List<Validator> validators;
 
   @override
-  String get name => MirrorSystem.getName(property);
+  String get name {
+    return MirrorSystem.getName(property);
+  }
 
   @override
   String message(Object value, String property) {
@@ -60,7 +63,7 @@ class PropertyValidator extends Validator<Object> {
   bool isValid(Object value) {
     var result = true;
 
-    for (var validator in validators) {
+    for (final validator in validators) {
       result &= validator.isValid(value);
     }
 
@@ -68,13 +71,13 @@ class PropertyValidator extends Validator<Object> {
   }
 
   @override
-  ValidatorError validate(Object target, [String property]) {
+  ValidatorError validate(dynamic target, [String property]) {
     final messages = <String, String>{};
     final field = reflect(target).getField(this.property);
-    final value = field.reflectee as Object;
+    final value = field.reflectee as dynamic;
     property = MirrorSystem.getName(this.property);
 
-    for (var validator in validators) {
+    for (final validator in validators) {
       if (validator.isValid(value)) {
         messages[validator.name] = validator.message(value, property);
       }
@@ -113,7 +116,7 @@ class ClassValidator<T> extends Validator<T> {
   bool isValid(T value) {
     var result = true;
 
-    for (var validator in validators) {
+    for (final validator in validators) {
       result &= validator.isValid(value);
     }
 
@@ -124,22 +127,42 @@ class ClassValidator<T> extends Validator<T> {
   ValidatorError validate(T value, [String property]) {
     final children = <ValidatorError>[];
 
-    for (var validator in validators) {
+    for (final validator in validators) {
       final error = validator.validate(value);
 
-      if (error != null) {
-        children.add(error);
+      if (error == null) {
+        continue;
       }
+
+      children.add(error);
     }
 
-    return ValidatorError(
-      value: this,
-      children: children,
-    );
+    return ValidatorError(value: this, children: children);
   }
 }
 
 List<ValidatorError> validate<T>(T value) {
-  final error = getValidatorFor<T>()?.validate(value);
-  return error?.children;
+  final validator = getValidatorFor<T>();
+
+  if (validator == null) {
+    throw Exception('validator for <$T> not found');
+  }
+
+  final error = validator.validate(value);
+
+  if (error == null) {
+    return null;
+  }
+
+  return error.children;
+}
+
+bool isValid<T>(T value) {
+  final validator = getValidatorFor<T>();
+
+  if (validator == null) {
+    throw Exception('validator for <$T> not found');
+  }
+
+  return validator.isValid(value);
 }
