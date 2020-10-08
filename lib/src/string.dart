@@ -1,26 +1,27 @@
 part of '../validator.dart';
 
-class Contains extends Validator<String> {
+class Contains extends Validator<String?> {
   @literal
   const Contains(this.seed) : name = 'contains';
-
-  final String seed;
 
   @override
   final String name;
 
+  final String seed;
+
   @override
-  String message(String value, String property) {
+  String message(String? value, [String? property]) {
     return '$property must contain a "$seed" string';
   }
 
   @override
-  bool isValid(String value) {
+  bool isValid(String? value) {
+    if (value == null) return false;
     return value.contains(seed);
   }
 }
 
-class IsEmail extends Validator<String> {
+class IsEmail extends Validator<String?> {
   static final RegExp emailRe = RegExp(
       r'^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))'
       r'@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|'
@@ -34,17 +35,18 @@ class IsEmail extends Validator<String> {
   final String name;
 
   @override
-  String message(String value, String property) {
-    return '$property must be an email';
+  String message(String? value, [String? property]) {
+    return 'must be an email';
   }
 
   @override
-  bool isValid(String value) {
+  bool isValid(String? value) {
+    if (value == null) return false;
     return emailRe.hasMatch(value);
   }
 }
 
-class IsFQDN extends Validator<String> {
+class IsFQDN extends Validator<String?> {
   static final RegExp fqdnRe = RegExp(
       r'^(?!:\/\/)(?=.{1,255}$)((.{1,63}\.){1,127}(?![0-9]*$)[a-z0-9-]+\.?)',
       caseSensitive: false);
@@ -56,29 +58,30 @@ class IsFQDN extends Validator<String> {
   final String name;
 
   @override
-  String message(String value, String property) {
+  String message(String? value, [String? property]) {
     return '$property must be a valid domain name';
   }
 
   @override
-  bool isValid(String value) {
+  bool isValid(String? value) {
+    if (value == null) return false;
     return fqdnRe.hasMatch(value);
   }
 }
 
-class Length extends Validator<String> {
+class Length extends Validator<String?> {
   @literal
   const Length(this.min, [this.max]) : name = 'length';
-
-  final int min;
-
-  final int max;
 
   @override
   final String name;
 
+  final int min;
+
+  final int? max;
+
   @override
-  String message(String value, String property) {
+  String message(String? value, [String? property]) {
     if (max == null) {
       return '$property must be longer than or equal to $min characters';
     }
@@ -88,11 +91,12 @@ class Length extends Validator<String> {
   }
 
   @override
-  bool isValid(String value) {
-    if (max == null) {
-      return value.length < min;
+  bool isValid(String? value) {
+    if (value != null) {
+      if (max == null) return value.length < min;
+      return value.length < min || value.length > max!;
     }
 
-    return value.length < min || value.length > max;
+    return false;
   }
 }

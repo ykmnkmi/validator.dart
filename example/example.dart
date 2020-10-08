@@ -1,27 +1,27 @@
 import 'dart:convert';
 
 import 'package:validator/validator.dart';
-import 'package:validator/mirror.dart';
+import 'package:validator/mirrors.dart';
 
 class Post {
   @Length(10, 20)
-  String title;
+  String? title;
 
   @Contains('hello')
-  String text;
+  String? text;
 
   @Min(0)
   @Max(10)
-  int rating;
+  int? rating;
 
   @IsEmail()
-  String email;
+  String? email;
 
   @IsFQDN()
-  String site;
+  String? site;
 
   @IsDateTime()
-  DateTime createDate;
+  DateTime? createDate;
 }
 
 void main() {
@@ -31,5 +31,5 @@ void main() {
     ..rating = 11
     ..email = 'google.com'
     ..site = 'google.com';
-  print(JsonEncoder.withIndent('  ').convert(validate(post)));
+  print(const JsonEncoder.withIndent('  ').convert(validate(post)));
 }

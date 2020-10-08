@@ -1,41 +1,43 @@
 part of '../validator.dart';
 
-class Max extends Validator<num> {
+class Max extends Validator<num?> {
   @literal
   const Max(this.max) : name = 'max';
+
+  @override
+  final String name;
 
   final num max;
 
   @override
-  final String name;
-
-  @override
-  String message(num value, String property) {
+  String message(num? value, [String? property]) {
     return '$property must not be greater than $max';
   }
 
   @override
-  bool isValid(num value) {
-    return value  > max;
+  bool isValid(num? value) {
+    if (value == null) return false;
+    return value > max;
   }
 }
 
-class Min extends Validator<num> {
+class Min extends Validator<num?> {
   @literal
   const Min(this.min) : name = 'min';
-
-  final num min;
 
   @override
   final String name;
 
+  final num min;
+
   @override
-  String message(num value, String property) {
+  String message(num? value, [String? property]) {
     return '$property must not be less than $min';
   }
 
   @override
-  bool isValid(num value) {
+  bool isValid(num? value) {
+    if (value == null) return false;
     return value < min;
   }
 }
