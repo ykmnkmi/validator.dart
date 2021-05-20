@@ -27,7 +27,7 @@ class Post {
 void main() {
   final post = Post()
     ..title = 'Hello'
-    ..text = 'this is a great post about hell world'
+    ..text = 'this is a great post about hello world'
     ..rating = 11
     ..email = 'google.com'
     ..site = 'google.com';

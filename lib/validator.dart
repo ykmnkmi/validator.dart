@@ -25,7 +25,7 @@ abstract class Validator<T> {
     return ValidatorError(
       property: property,
       value: value,
-      constraints: {
+      constraints: <String, String>{
         name: message(value, property),
       },
     );
@@ -36,13 +36,7 @@ abstract class Validator<T> {
 class ValidatorError implements Exception {
   static bool includeTarget = false;
 
-  const ValidatorError({
-    this.property,
-    this.value,
-    this.constraints,
-    this.target,
-    this.children,
-  });
+  const ValidatorError({this.property, this.value, this.constraints, this.target, this.children});
 
   final Object? target;
 
@@ -54,8 +48,8 @@ class ValidatorError implements Exception {
 
   final List<ValidatorError>? children;
 
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
       if (includeTarget && target != null) 'target': target,
       if (property != null) 'property': property,
       if (value != null) 'value': value,

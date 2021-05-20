@@ -16,17 +16,20 @@ class Contains extends Validator<String?> {
 
   @override
   bool isValid(String? value) {
-    if (value == null) return false;
+    if (value == null) {
+      return false;
+    }
+
     return value.contains(seed);
   }
 }
 
 class IsEmail extends Validator<String?> {
-  static final RegExp emailRe = RegExp(
-      r'^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))'
+  static const String _email = r'^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))'
       r'@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|'
-      r'(([a-z\-0-9]+\.)+[a-z]{2,}))$',
-      caseSensitive: false);
+      r'(([a-z\-0-9]+\.)+[a-z]{2,}))$';
+
+  static RegExp? emailRe;
 
   @literal
   const IsEmail() : name = 'is_email';
@@ -41,15 +44,18 @@ class IsEmail extends Validator<String?> {
 
   @override
   bool isValid(String? value) {
-    if (value == null) return false;
-    return emailRe.hasMatch(value);
+    if (value == null) {
+      return false;
+    }
+
+    return (emailRe ??= RegExp(_email, caseSensitive: false)).hasMatch(value);
   }
 }
 
 class IsFQDN extends Validator<String?> {
-  static final RegExp fqdnRe = RegExp(
-      r'^(?!:\/\/)(?=.{1,255}$)((.{1,63}\.){1,127}(?![0-9]*$)[a-z0-9-]+\.?)',
-      caseSensitive: false);
+  static const String _fqdn = r'^(?!:\/\/)(?=.{1,255}$)((.{1,63}\.){1,127}(?![0-9]*$)[a-z0-9-]+\.?)';
+
+  static RegExp? fqdnRe;
 
   @literal
   const IsFQDN() : name = 'is_fqdn';
@@ -64,8 +70,11 @@ class IsFQDN extends Validator<String?> {
 
   @override
   bool isValid(String? value) {
-    if (value == null) return false;
-    return fqdnRe.hasMatch(value);
+    if (value == null) {
+      return false;
+    }
+
+    return (fqdnRe ??= RegExp(_fqdn, caseSensitive: false)).hasMatch(value);
   }
 }
 
@@ -86,14 +95,16 @@ class Length extends Validator<String?> {
       return '$property must be longer than or equal to $min characters';
     }
 
-    return '$property must be longer than or equal to $min and shorter than or'
-        ' equal to $max characters';
+    return '$property must be longer than or equal to $min and shorter than or equal to $max characters';
   }
 
   @override
   bool isValid(String? value) {
     if (value != null) {
-      if (max == null) return value.length < min;
+      if (max == null) {
+        return value.length < min;
+      }
+
       return value.length < min || value.length > max!;
     }
 

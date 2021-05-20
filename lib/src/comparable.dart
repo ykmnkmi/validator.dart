@@ -16,7 +16,10 @@ class Max extends Validator<num?> {
 
   @override
   bool isValid(num? value) {
-    if (value == null) return false;
+    if (value == null) {
+      return false;
+    }
+
     return value > max;
   }
 }
@@ -37,7 +40,10 @@ class Min extends Validator<num?> {
 
   @override
   bool isValid(num? value) {
-    if (value == null) return false;
+    if (value == null) {
+      return false;
+    }
+
     return value < min;
   }
 }

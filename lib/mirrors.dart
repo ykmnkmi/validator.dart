@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'validator.dart';
 
-final _container = <Type, Validator>{};
+final Map<Type, Validator> _container = <Type, Validator>{};
 
 Validator<T> getValidatorFor<T>() {
   if (_container.containsKey(T)) {
@@ -19,25 +19,22 @@ Validator<T> getValidatorFor<T>() {
 
   final validators = <Symbol, List<Validator<Object?>>>{};
 
-  for (final symbol in clazz.declarations.keys) {
+  declarations.forEach((symbol, declaration) {
     if (symbol == #hashCode || symbol == #runtimeType || symbol == #toString) {
-      continue;
+      return;
     }
 
-    final meta = declarations[symbol]!.metadata;
+    final meta = declaration.metadata;
 
     if (meta.isNotEmpty) {
       final member = members[symbol];
 
       if (member != null && member.isGetter && !member.isStatic) {
-        final propertyValidators = meta
-            .map<Object?>((m) => m.reflectee)
-            .whereType<Validator<Object?>>()
-            .toList(growable: false);
+        final propertyValidators = meta.map<Object?>((m) => m.reflectee).whereType<Validator<Object?>>().toList();
         validators[symbol] = propertyValidators;
       }
     }
-  }
+  });
 
   return _container[T] = ClassValidator<T>(validators);
 }
